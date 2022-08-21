@@ -1,4 +1,5 @@
-const API_URL = "https://cbe6-2603-7000-d700-6107-1c04-cb86-9f42-3457.ngrok.io/login";
+const API_URL =
+  "https://cbe6-2603-7000-d700-6107-1c04-cb86-9f42-3457.ngrok.io/login";
 
 async function logIn(username, password) {
   if (!username || !password) {
@@ -11,15 +12,17 @@ async function logIn(username, password) {
       method: "post",
       body: JSON.stringify(body),
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     });
-
-    const token = await response.json();
-
-    return token;
+    if (response.ok) {
+      const token = await response.json();
+console.log(token);
+      return token;
+    } 
   } catch (err) {
     throw new Error(err);
+    console.log('auth.js error',{err});
   }
 }
 

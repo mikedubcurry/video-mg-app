@@ -1,15 +1,23 @@
 import { observer } from "mobx-react-lite";
 import { useState, useContext } from "react";
-import { AuthContext } from "../stores/authStore";
+import { AuthContext, useAuthStore } from "../stores/authStore";
 import LogIn from "./LogIn";
+import Room from "./Room";
 
 function App() {
-  const authStore = useContext(AuthContext);
+  const authStore = useAuthStore();
 
   if (authStore.token) {
-    return <h1>Hello</h1>;
+    history.pushState({}, "", "/room");
+    return <Room />;
   } else {
-    return <LogIn />;
+    history.pushState({}, "", "/");
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        {authStore.authError}
+        <LogIn />
+      </div>
+    );
   }
 }
 
