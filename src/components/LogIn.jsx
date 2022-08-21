@@ -1,8 +1,8 @@
 import { observer } from "mobx-react-lite";
 import { useState, useContext } from "react";
-import { AuthContext, FETCH_STATES } from "./stores/authStore";
+import { AuthContext, FETCH_STATES } from "../stores/authStore";
 
-function App() {
+function LogIn() {
   const [username, setUname] = useState("");
   const [password, setPword] = useState("");
 
@@ -11,7 +11,10 @@ function App() {
   console.log(authStore.token, authStore.fetchState);
   const logIn = () => {
     authStore.authenticate(username, password);
+    setUname("");
+    setPword("");
   };
+
   return (
     <div>
       <label htmlFor="uname">Username</label>
@@ -39,4 +42,4 @@ function App() {
   );
 }
 
-export default observer(App);
+export default observer(LogIn);
