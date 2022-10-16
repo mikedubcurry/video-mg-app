@@ -11,7 +11,11 @@ export const FETCH_STATES = {
 };
 
 export class AuthStore {
-  constructor(props) {
+  token = null;
+  fetchState = FETCH_STATES.IDLE;
+  authError = null;
+
+  constructor(rootStore, props) {
     makeObservable(this, {
       token: observable,
       authenticate: action,
@@ -21,24 +25,24 @@ export class AuthStore {
       authError: observable,
       setAuthError: action,
     });
+    this.rootStore = rootStore;
     if (props) {
       this.token = props.token;
     }
   }
-  token = null;
-  fetchState = FETCH_STATES.IDLE;
-  authError = null;
 
-  authenticate = (username, password) => {
+  authenticate = (username, password, cb) => {
     this.setFetchState(FETCH_STATES.PENDING);
 
     authService
       .logIn(username, password)
       .then((token) => {
         if (token) {
-          this.setFetchState(FETCH_STATES.DONE);
+            console.log(token)
+          this.setFetchState(FETCH_STATES.PENDING);
           this.setToken(token);
           this.setAuthError(null);
+          cb()
         } else {
           this.setFetchState(FETCH_STATES.ERROR);
           this.setToken(null);
@@ -60,12 +64,15 @@ export class AuthStore {
   };
 
   setToken = (token) => {
-    let localToken = {
-      token,
-      expiresAt: new Date().getTime() + 3600000, // token good for an hour
-    };
-    localStorage.setItem("video-mg-id", JSON.stringify(localToken));
-    this.token = token;
+    console.log("setting token: ", token);
+    if (token) {
+      let localToken = {
+        token,
+        expiresAt: new Date().getTime() + 3600000, // token good for an hour
+      };
+      localStorage.setItem("video-mg-id", JSON.stringify(localToken));
+      this.token = token;
+    }
   };
 
   setAuthError = (error) => {

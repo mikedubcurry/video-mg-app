@@ -1,5 +1,6 @@
+import { redirectTo } from "@reach/router";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FETCH_STATES, useAuthStore } from "../stores/authStore";
 
 function LogIn() {
@@ -9,10 +10,18 @@ function LogIn() {
   const authStore = useAuthStore();
 
   const logIn = () => {
-    authStore.authenticate(username, password);
+      authStore.authenticate(username, password, () => {
+          redirectTo('/room')
+      });
     setUname("");
     setPword("");
   };
+
+    useEffect(() => {
+        if(authStore.token) {
+            redirectTo('/room')
+        }
+    })
 
   return (
     <div className="flex flex-col bg-gray-300 p-8 gap-2 rounded-md">

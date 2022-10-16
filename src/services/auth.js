@@ -1,5 +1,5 @@
 const API_URL =
-  "https://cbe6-2603-7000-d700-6107-1c04-cb86-9f42-3457.ngrok.io/login";
+  "http://localhost:3000/login";
 
 async function logIn(username, password) {
   if (!username || !password) {
@@ -16,13 +16,13 @@ async function logIn(username, password) {
       },
     });
     if (response.ok) {
-      const token = await response.json();
+      const {token} = await response.json();
 console.log(token);
       return token;
     } 
   } catch (err) {
-    throw new Error(err);
     console.log('auth.js error',{err});
+    throw new Error(err);
   }
 }
 
