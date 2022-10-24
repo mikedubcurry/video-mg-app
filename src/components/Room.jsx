@@ -1,18 +1,35 @@
-import { useEffect } from "react";
-import { useAuthStore } from "../stores/authStore";
-import { useStreamStore } from "../stores/streamStore";
+import { useEffect } from 'react'
+import { observer } from 'mobx-react-lite'
+
+import { useStreamStore } from '../stores/streamStore'
 
 function Room() {
-  const streamStore = useStreamStore();
-  console.log(streamStore);
+    const streamStore = useStreamStore()
 
-  useEffect(() => {
-    console.log("fetching api token");
-    const token = streamStore.getToken('test')
-      console.log({token})
-  }, [streamStore.apiToken]);
+    useEffect(() => {
+        console.log('fetching api token')
+        streamStore.getToken(streamStore.roomName).then((token) => {
+            connect(token, {
+                name: streamStore.roomName,
+            })
+                .then((room) => {
+                    console.log(`successfully joined room: ${room}`)
+                })
+                .catch((e) => {
+                    console.log(e)
+                })
+        })
+    }, [])
 
-  return <h1>Room</h1>;
+    const handleParticipantConnected = (participant) => {
+        participant.removeAllEventListeners()
+    }
+
+    return (
+        <>
+            <h1>{streamStore.roomName}</h1>
+        </>
+    )
 }
 
-export default Room;
+export default observer(Room)

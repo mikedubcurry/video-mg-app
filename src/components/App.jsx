@@ -1,36 +1,39 @@
-import { observer } from "mobx-react-lite";
-import { useState, useContext, useEffect } from "react";
-import {Router, Redirect, redirectTo} from '@reach/router'
-import { AuthContext, useAuthStore } from "../stores/authStore";
-import { StreamProvider } from "../providers/StreamProvider";
-import LogIn from "./LogIn";
-import Room from "./Room";
+import { useEffect } from 'react'
+import { observer } from 'mobx-react-lite'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../stores/authStore'
+
 function App() {
-  const authStore = useAuthStore();
-
+    const authStore = useAuthStore()
+    const navigate = useNavigate()
     useEffect(() => {
-        console.log(authStore.token)
+        if (authStore.token) {
+            navigate('/rooms')
+        } else {
+            navigate('/')
+        }
     }, [authStore.token])
-
-    return (
-        <Router>
-            <LogIn path="/" />
-            <PrivateRoute as={Room } path="/room" />
-        </Router>
-    )
-}
-
-function PrivateRoute({as, ...rest}) {
-    const authStore = useAuthStore();
-
-    console.log(authStore.token)
-    if(!authStore.token) {
-        return redirectTo('/')
+    const logOut = () => {
+        authStore.unauthenticate()
     }
-    const Component = as;
     return (
-        <Component {...rest} />
+        <>
+            <header className="text-center bg-green-400 py-8">VideOMG</header>
+            <nav>
+                {authStore.token && (
+                    <button
+                        className="bg-blue-200 px-4 py-2 rounded-lg"
+                        onClick={logOut}
+                    >
+                        Log Out
+                    </button>
+                )}
+            </nav>
+            <div>
+                <Outlet />
+            </div>
+        </>
     )
 }
 
-export default observer(App);
+export default observer(App)

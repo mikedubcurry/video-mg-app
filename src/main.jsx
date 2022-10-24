@@ -1,40 +1,84 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./components/App";
-import { AuthStore, createAuthStore } from "./stores/authStore";
-import { createRootStore } from "./stores/rootStore";
-import { AuthProvider } from "./providers/AuthProvider";
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { createBrowserRouter, Routes, RouterProvider } from 'react-router-dom'
 
-import styles from "./index.css";
-import { RootStateProvider } from "./providers/RootStoreProvider";
-import { StreamProvider } from "./providers/StreamProvider";
+import { AuthStore, createAuthStore } from './stores/authStore'
+import { createRootStore } from './stores/rootStore'
+import { AuthProvider } from './providers/AuthProvider'
+import styles from './index.css'
+import { RootStateProvider } from './providers/RootStoreProvider'
+import { StreamProvider } from './providers/StreamProvider'
+import App from './components/App'
+import LogIn from './components/LogIn'
+import Room from './components/Room'
+import Rooms from './components/Rooms'
 
 // check local storage for auth token. if exists, check its expiration. if good, initialize auth state with token
-let token;
+let token
 try {
-  let localToken = localStorage.getItem("video-mg-id");
-  if (localToken) {
-    localToken = JSON.parse(localToken);
-    if (localToken.expiresAt > Date.now()) {
-      token = localToken.token;
-    } else {
-      localStorage.removeItem("video-mg-id");
+    let localToken = localStorage.getItem('video-mg-id')
+    if (localToken) {
+        localToken = JSON.parse(localToken)
+        if (localToken.expiresAt > Date.now()) {
+            console.log('token is good')
+            token = localToken.token
+        } else {
+            console.log('removing token')
+            localStorage.removeItem('video-mg-id')
+        }
     }
-  }
 } catch (err) {
-  token = null;
+    token = null
 }
 // const authStore = createAuthStore({ token });
-const rootStore = createRootStore({ token });
+const rootStore = createRootStore({ token })
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <RootStateProvider rootStore={rootStore}>
-      <AuthProvider authStore={rootStore.authStore}>
-        <StreamProvider streamStore={rootStore.streamStore}>
-          <App />
-        </StreamProvider>
-      </AuthProvider>
-    </RootStateProvider>
-  </React.StrictMode>
-);
+const roomsLoader = async () => {
+    const response = await fetch(
+        'https://e8c8-2603-7000-d700-6107-f50d-1b3f-11e9-5c41.ngrok.io/rooms',
+        {
+            mode: 'cors',
+            headers: new Headers({
+                'ngrok-skip-browser-warning': '69420',
+            }),
+        }
+    )
+    if (response.ok) {
+        const data = await response.json()
+        console.log({ data })
+        return data.rooms
+    }
+}
+const router = createBrowserRouter([
+    {
+        path: '/',
+        element: <App />,
+        children: [
+            {
+                path: '',
+                element: <LogIn />,
+            },
+            {
+                path: '/rooms/:room',
+                element: <Room />,
+            },
+            {
+                path: '/rooms',
+                element: <Rooms />,
+                loader: roomsLoader,
+            },
+        ],
+    },
+])
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+        <RootStateProvider rootStore={rootStore}>
+            <AuthProvider authStore={rootStore.authStore}>
+                <StreamProvider streamStore={rootStore.streamStore}>
+                    <RouterProvider router={router}></RouterProvider>
+                </StreamProvider>
+            </AuthProvider>
+        </RootStateProvider>
+    </React.StrictMode>
+)
