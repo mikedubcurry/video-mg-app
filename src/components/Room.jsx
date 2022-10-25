@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
+import { connect } from 'twilio-video'
 
 import { useStreamStore } from '../stores/streamStore'
 
